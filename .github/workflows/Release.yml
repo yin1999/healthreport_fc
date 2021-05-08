@@ -1,0 +1,61 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: 'version(vX.Y.Z) to release'
+        required: true
+        default: 'v'
+      MESSAGE:
+        description: 'message for release body'
+      GoVersion:
+        description: >
+          Go version(X.Y.Z) for build
+          default: latest go version
+  push:
+    tags:
+    - '*'
+
+env:
+  MESSAGE: ${{ github.event.inputs.MESSAGE }}
+  VERSION: ${{ github.event.inputs.VERSION }}
+  GoVersion: ${{ github.event.inputs.GoVersion }}
+
+jobs:
+  release:
+    name: Release on GitHub
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set GoVersion
+      if: env.GoVersion == ''
+      run: |
+        echo "GoVersion=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oEm 1 '"version": "[0-9]{1}.[0-9]{1,}(.[0-9]{1,})?"' | cut -d':' -f2 | sed 's/ //g; s/"//g')" >> ${GITHUB_ENV}
+
+    - name: Set ENV for 'Create Tag'
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> ${GITHUB_ENV}
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ env.GoVersion }}
+
+    - name: Download dependency
+      run: make dep
+
+    - name: Build
+      run: |
+        make all
+
+    - name: Create Release
+      run: |
+        gh release create ${{ env.VERSION }} -n "${{ env.MESSAGE }}" -t "${{ env.name }}" ${{ env.files }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # attribute
+        name: 健康打卡_函数计算版${{ env.VERSION }}
+        files: bootstrap.zip
