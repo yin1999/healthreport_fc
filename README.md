@@ -8,25 +8,35 @@
 
 ## 编译教程
 
-若想要直接使用，请转至[下载发行版](#下载发行版)
+若想要直接使用，请转至[使用说明](#使用说明)
 
-1. 环境配置，以CentOS 7为例
+1. 环境配置，以`CentOS`/`Debian`为例
 
-    安装软件：Golang[>= 1.16]、git、make、zip
+    - 安装Golang[>= 1.16]: [golang.google.cn/doc/install](https://golang.google.cn/doc/install)
 
-       yum install -y golang git make zip
+    - 安装git、make、zip
+
+       ```bash
+       # Centos
+       sudo yum install git make zip
+
+       # Debian/Ubuntu
+       sudo apt install git make zip
+       ```
 
 2. 通过源码下载、编译
 
-       go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct  #配置Goproxy
+    ```bash
+    # 配置Goproxy
+    go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct
 
-       #下载
-       git clone https://github.com/yin1999/healthreport_fc.git
-       cd healthreport_fc
-
-3. 编译
-
-       make # 生成二进制文件bootstrap.zip
+    # 下载源码
+    git clone https://github.com/yin1999/healthreport_fc.git
+    cd healthreport_fc
+    
+    # 编译
+    make # 生成二进制文件bootstrap.zip
+    ```
 
 ## 使用说明
 
