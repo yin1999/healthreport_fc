@@ -8,6 +8,7 @@
 
 ## 编译教程
 
+**请在Linux系统下编译**，Windows操作系统下可正常执行交叉编译，但在无其他依赖的情况下无法授予可执行权限（无法在函数计算中正常运行）。  
 若想要直接使用，请转至[使用说明](#使用说明)
 
 1. 环境配置，以`CentOS`/`Debian`为例
@@ -18,10 +19,10 @@
 
        ```bash
        # Centos
-       sudo yum install git make zip
+       sudo yum install -y git make zip
 
        # Debian/Ubuntu
-       sudo apt install git make zip
+       sudo apt install -y git make zip
        ```
 
 2. 通过源码下载、编译
@@ -85,4 +86,4 @@
 |启用触发器|是|启用后即可触发函数运行，以后若需暂时停用触发器，直接将其设置成**否**即可|
 |触发消息|例："1862X10XXX Password"(不包含双引号) |填写学校健康填报用户名、密码(用户名与密码之间使用一个**换行符**、**空格**或**制表符**隔开即可)，示例指用户名为**1862X10XXX**，密码为**Password**|
 
-5. 已完成触发器配置
+5. 已完成触发器配置，函数计算会被自动触发（完成健康填报）。
