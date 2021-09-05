@@ -52,7 +52,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("error account data"))
 		return
 	}
-	err = client.Punch(context.Background(), [2]string{account[0], account[1]}, 30*time.Second)
+	err = client.Punch(context.Background(), &client.Account{Username: account[0], Password: account[1]}, 30*time.Second)
 	if err != nil {
 		Log(Error, requestID, "Punch Failed: %s\n", err.Error())
 		w.Header().Set(fcStatus, "404")
