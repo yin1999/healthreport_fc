@@ -2,6 +2,6 @@ module main
 
 go 1.17
 
-require github.com/yin1999/healthreport v1.0.13
+require github.com/yin1999/healthreport v1.0.14
 
 require github.com/google/go-querystring v1.1.0 // indirect
