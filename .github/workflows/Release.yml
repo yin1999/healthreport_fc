@@ -12,9 +12,8 @@ on:
         description: >
           Go version(X.Y.Z) for build
           default: latest go version
-  push:
-    tags:
-    - '*'
+  release:
+    types: [published]
 
 env:
   MESSAGE: ${{ github.event.inputs.MESSAGE }}
@@ -52,10 +51,18 @@ jobs:
         make all
 
     - name: Create Release
+      if: github.event_name != 'release'
       run: |
-        gh release create ${{ env.VERSION }} -n "${{ env.MESSAGE }}" -t "${{ env.name }}" ${{ env.files }}
+        gh release create ${{ env.VERSION }} -n "${{ env.MESSAGE }}" -t "${{ env.name }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # attribute
         name: 健康打卡_函数计算版${{ env.VERSION }}
+
+    - name: Upload Assets
+      run: |
+        gh release upload ${{ env.VERSION }} ${{ env.files }} --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # attribute
         files: bootstrap.zip
