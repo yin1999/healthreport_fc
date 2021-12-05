@@ -61,8 +61,6 @@ jobs:
 
     - name: Upload Assets
       run: |
-        gh release upload ${{ env.VERSION }} ${{ env.files }} --clobber
+        gh release upload ${{ env.VERSION }} *.zip --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # attribute
-        files: bootstrap.zip
