@@ -4,7 +4,7 @@
 
 本项目用于河海大学健康打卡，此项目为基于[健康打卡_河海大学版](https://github.com/yin1999/healthreport)的函数计算版本。  
 
-当前仅适用于[阿里云函数计算](https://fc.console.aliyun.com/)，若使用腾讯云的相关产品，请自行修改代码
+目前支持 [阿里云函数计算](https://www.aliyun.com/product/fc) 以及 [腾讯云云函数](https://cloud.tencent.com/product/sls) 平台。
 
 ## 编译教程
 
