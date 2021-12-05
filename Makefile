@@ -1,20 +1,18 @@
 # flags
-LDFLAGS=-ldflags "-s -w"
+targets?=aliyun tencent # default to all
+LDFLAGS=-ldflags "-s -w -buildid="
 
 # make
-all: dep build pack
+all: dep build
 
 dep:
 	@echo Downloading dependencies...
 	@go mod download
 
-build: export GOOS=linux
-build: export GOARCH=amd64
 build:
 	@echo Building...
-	@go build ${LDFLAGS} -o bootstrap
-
-pack:
-	@echo packing...
-	@zip -r bootstrap.zip bootstrap
-	@rm -rf bootstrap
+	@for target in ${targets}; do \
+	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -tags $${target} -trimpath -o bootstrap; \
+	zip -rq $${target}-serverless.zip bootstrap; \
+	done
+	@rm -f bootstrap

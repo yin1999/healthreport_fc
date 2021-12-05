@@ -1,15 +1,12 @@
+//go:build aliyun || !tencent
+
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
-	"time"
-
-	client "github.com/yin1999/healthreport/httpclient"
 )
 
 type timerTrigger struct {
@@ -19,71 +16,49 @@ type timerTrigger struct {
 }
 
 const (
-	fcStatus = "x-fc-status"
+	fcStatus = "X-Fc-Status"
 )
 
-func main() {
-	port := os.Getenv("FC_SERVER_PORT")
-	if port == "" {
-		port = "9000"
-	}
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":"+port, nil)
+func init() {
+	h = &aliyun{}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Header.Get("x-fc-request-id")
-	fmt.Printf("FC Invoke Start RequestId: %s\n", requestID)
-	defer fmt.Printf("FC Invoke End RequestId: %s\n", requestID)
-
-	var t = &timerTrigger{}
-	err := json.NewDecoder(r.Body).Decode(t)
-
-	if err != nil {
-		Log(Fatal, requestID, "error payload format\n")
-		w.Header().Set(fcStatus, "404")
-		w.Write([]byte("error payload format"))
-		return
-	}
-	account := strings.Fields(t.Payload)
-	if len(account) < 2 {
-		Log(Fatal, requestID, "error account data\n")
-		w.Header().Set(fcStatus, "404")
-		w.Write([]byte("error account data"))
-		return
-	}
-	err = client.Punch(context.Background(), &client.Account{Username: account[0], Password: account[1]}, 30*time.Second)
-	if err != nil {
-		Log(Error, requestID, "Punch Failed: %s\n", err.Error())
-		w.Header().Set(fcStatus, "404")
-		fmt.Fprintf(w, "Punch Failed: %s", err.Error())
-	} else {
-		Log(Info, requestID, "Punch Success\n")
-		w.Write([]byte("success"))
-	}
+type aliyun struct {
+	port string
 }
 
-// Level log level
-type Level int
-
-const (
-	None Level = iota
-	Info
-	Error
-	Fatal
-)
-
-var level2string = [...]string{"", "Info", "Error", "Fatal"}
-
-func (l Level) String() string {
-	return level2string[l]
+func (a *aliyun) Init() error {
+	a.port = os.Getenv("FC_SERVER_PORT")
+	if a.port == "" {
+		a.port = "9000"
+	}
+	return nil
 }
 
-func Log(level Level, requestID, format string, v ...interface{}) {
-	t := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-	prefix := fmt.Sprintf("%s RequestID: %s ", t, requestID)
-	if level != None {
-		prefix += fmt.Sprintf("[%s] ", level)
-	}
-	fmt.Fprintf(os.Stderr, prefix+format, v...)
+func (a aliyun) ListenAndServe(punch func(payload string) error) error {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		requestId := r.Header.Get("X-Fc-Request-Id")
+		fmt.Printf("FC Invoke Start RequestId: %s\n", requestId)
+		defer fmt.Printf("FC Invoke End RequestId: %s\n", requestId)
+
+		t := &timerTrigger{}
+		err := json.NewDecoder(r.Body).Decode(t)
+
+		if err != nil {
+			Fatal.Log(requestId, "error payload format\n")
+			w.Header().Set(fcStatus, "404")
+			w.Write([]byte("error payload format"))
+			return
+		}
+		err = punch(t.Payload)
+		if err != nil {
+			Error.Log(requestId, "Punch Failed: %s\n", err.Error())
+			w.Header().Set(fcStatus, "404")
+			fmt.Fprintf(w, "Punch Failed: %s", err.Error())
+		} else {
+			Info.Log(requestId, "Punch Success\n")
+			w.Write([]byte("success"))
+		}
+	})
+	return http.ListenAndServe(":"+a.port, nil)
 }
