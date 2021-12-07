@@ -11,14 +11,11 @@ import (
 )
 
 type handler interface {
-	Init() error
 	ListenAndServe(punch func(payload string) error) error
 }
 
-var h handler
-
 func main() {
-	err := h.Init()
+	h, err := regist()
 	if err != nil {
 		os.Exit(1)
 	}

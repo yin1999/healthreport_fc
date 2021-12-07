@@ -19,20 +19,18 @@ const (
 	fcStatus = "X-Fc-Status"
 )
 
-func init() {
-	h = &aliyun{}
+func regist() (handler, error) {
+	port := os.Getenv("FC_SERVER_PORT")
+	if port == "" {
+		port = "9000"
+	}
+	return &aliyun{
+		port: port,
+	}, nil
 }
 
 type aliyun struct {
 	port string
-}
-
-func (a *aliyun) Init() error {
-	a.port = os.Getenv("FC_SERVER_PORT")
-	if a.port == "" {
-		a.port = "9000"
-	}
-	return nil
 }
 
 func (a aliyun) ListenAndServe(punch func(payload string) error) error {

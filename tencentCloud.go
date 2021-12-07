@@ -11,8 +11,18 @@ import (
 
 const contentType = "text/plain"
 
-func init() {
-	h = &tencent{}
+func regist() (handler, error) {
+	host := os.Getenv("SCF_RUNTIME_API")
+	port := os.Getenv("SCF_RUNTIME_API_PORT")
+	reportAPI := "http://" + host + ":" + port
+	res, err := http.Post(reportAPI+"/runtime/init/ready", contentType, http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+	res.Body.Close()
+	return &tencent{
+		reportAPI: reportAPI,
+	}, err
 }
 
 type tencent struct {
@@ -23,17 +33,6 @@ type timerTrigger struct {
 	TriggerTime string `json:"Time"`
 	TriggerName string `json:"TriggerName"`
 	Payload     string `json:"Message"`
-}
-
-func (h *tencent) Init() error {
-	host := os.Getenv("SCF_RUNTIME_API")
-	port := os.Getenv("SCF_RUNTIME_API_PORT")
-	h.reportAPI = "http://" + host + ":" + port
-	res, err := http.Post(h.reportAPI+"/runtime/init/ready", contentType, http.NoBody)
-	if err == nil {
-		res.Body.Close()
-	}
-	return err
 }
 
 func (h tencent) ListenAndServe(punch func(payload string) error) error {
