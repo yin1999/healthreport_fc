@@ -24,6 +24,12 @@ func main() {
 	}
 }
 
+func init() {
+	if os.Getenv("INSECURE") == "1" {
+		client.SetSslVerify(false)
+	}
+}
+
 func punch(payload string) error {
 	account := strings.Fields(payload)
 	if len(account) < 2 {
