@@ -28,6 +28,9 @@ func init() {
 	if os.Getenv("INSECURE") == "1" {
 		client.SetSslVerify(false)
 	}
+	if os.Getenv("OLD_SITE") == "1" {
+		client.SetPunchSite(true)
+	}
 }
 
 func punch(payload string) error {
