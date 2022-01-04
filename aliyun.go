@@ -43,18 +43,16 @@ func (a aliyun) ListenAndServe(punch func(payload string) error) error {
 		err := json.NewDecoder(r.Body).Decode(t)
 
 		if err != nil {
-			Fatal.Log(requestId, "error payload format\n")
+			Fatal.Log("error payload format\n")
 			w.Header().Set(fcStatus, "404")
 			w.Write([]byte("error payload format"))
 			return
 		}
 		err = punch(t.Payload)
 		if err != nil {
-			Error.Log(requestId, "Punch Failed: %s\n", err.Error())
 			w.Header().Set(fcStatus, "404")
 			fmt.Fprintf(w, "Punch Failed: %s", err.Error())
 		} else {
-			Info.Log(requestId, "Punch Success\n")
 			w.Write([]byte("success"))
 		}
 	})

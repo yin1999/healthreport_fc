@@ -40,7 +40,7 @@ func (h tencent) ListenAndServe(punch func(payload string) error) error {
 		res, err := http.Get(h.reportAPI + "/runtime/invocation/next")
 		if err != nil {
 			Error.Log("get trigger payload failed, err: %s\n", err.Error())
-			h.reportError("", "get payload failed, err: "+err.Error())
+			h.reportError("get payload failed, err: " + err.Error() + "\n")
 		}
 		requestId := res.Header.Get("Request_id")
 		dec := json.NewDecoder(res.Body)
@@ -49,27 +49,24 @@ func (h tencent) ListenAndServe(punch func(payload string) error) error {
 		res.Body.Close() // close body
 		if err != nil {
 			msg := "parse request body failed, err: " + err.Error()
-			Error.Log(requestId, msg+"\n")
-			h.reportError(requestId, msg)
+			Error.Log(msg + "\n")
+			h.reportError(msg)
 		}
 		err = punch(t.Payload)
 		if err != nil {
-			msg := "punch failed, err: " + err.Error()
-			Error.Log(requestId, msg+"\n")
-			h.reportError(requestId, msg)
+			h.reportError(err.Error() + "\n")
 		} else {
-			Info.Log(requestId, "punch success\n")
 			res, err := http.DefaultClient.Post(h.reportAPI+"/runtime/invocation/response", contentType, strings.NewReader(requestId))
 			if err == nil {
 				res.Body.Close()
 			} else {
-				Fatal.Log(requestId, err.Error()+"\n")
+				Fatal.Log(err.Error() + "\n")
 			}
 		}
 	}
 }
 
-func (h tencent) reportError(requestId, msg string) {
+func (h tencent) reportError(msg string) {
 	res, err := http.DefaultClient.Post(h.reportAPI+"/runtime/invocation/error",
 		contentType,
 		strings.NewReader(msg),
@@ -77,6 +74,6 @@ func (h tencent) reportError(requestId, msg string) {
 	if err == nil {
 		res.Body.Close()
 	} else {
-		Error.Log(requestId, err.Error()+"\n")
+		Error.Log(err.Error() + "\n")
 	}
 }
