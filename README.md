@@ -8,21 +8,20 @@
 
 ## 编译教程
 
-**请在Linux系统下编译**，Windows操作系统下可正常执行交叉编译，但在无其他依赖的情况下无法授予可执行权限（无法在函数计算中正常运行）。  
-若想要直接使用，请转至[使用说明](#使用说明)
+若想要直接使用（不对程序功能进行自定义），请转至[使用说明](#使用说明)
 
 1. 环境配置，以`CentOS`/`Debian`为例
 
     - 安装Golang[>= 1.16]: [golang.google.cn/doc/install](https://golang.google.cn/doc/install)
 
-    - 安装git、make、zip
+    - 安装 git
 
        ```bash
        # Centos
-       sudo yum install -y git make zip
+       sudo yum install -y git
 
        # Debian/Ubuntu
-       sudo apt install -y git make zip
+       sudo apt install -y git
        ```
 
 2. 通过源码下载、编译
@@ -36,8 +35,8 @@
     cd healthreport_fc
     
     # 编译
-    make # 生成二进制文件 xxx-serverless.zip
-    # make targets=aliyun  # 可使用targets指定编译目标（可选值：aliyun、tencent）
+    go run _script/build.go # 生成二进制文件 xxx-serverless.zip
+    #  go run _script/build.go aliyun  # 可指定多个编译编译目标（可选值：aliyun、tencent）
     ```
 
 ## 使用说明
