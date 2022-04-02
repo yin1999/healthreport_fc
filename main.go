@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -11,7 +13,9 @@ import (
 )
 
 type handler interface {
-	ListenAndServe(punch func(payload string) error) error
+	Next() (body io.ReadCloser, reqID string, err error)
+	ReportError(msg string, id string)
+	ReportSuccess(id string)
 }
 
 func main() {
@@ -19,14 +23,37 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
-	if err = h.ListenAndServe(punch); err != nil {
-		os.Exit(2)
-	}
+	startServe(h)
 }
 
 func init() {
 	if os.Getenv("INSECURE") == "1" {
 		client.SetSslVerify(false)
+	}
+}
+
+func startServe(handler handler) {
+	for {
+		body, id, err := handler.Next()
+		if err != nil {
+			Error.Log("get trigger payload failed, err: %s\n", err.Error())
+			continue
+		}
+		t := &timerTrigger{}
+		err = json.NewDecoder(body).Decode(t)
+		body.Close() // close body
+		if err != nil {
+			msg := "parse request body failed, err: " + err.Error()
+			Error.Log(msg + "\n")
+			handler.ReportError(msg, id)
+			continue
+		}
+		err = punch(t.Payload)
+		if err != nil {
+			handler.ReportError(err.Error(), id)
+		} else {
+			handler.ReportSuccess(id)
+		}
 	}
 }
 

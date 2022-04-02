@@ -31,8 +31,15 @@ jobs:
         go-version: ${{ env.GoVersion }}
 
     - name: Download dependency
-      run: make dep
+      run: go mod download
 
     - name: Build
       run: |
-        make build
+        # spread the work across 2 processes
+        build1=$!
+        go build -tags aliyun
+        build2=$!
+        go build -tags tencent
+
+        wait $build1
+        wait $build2

@@ -44,11 +44,18 @@ jobs:
         go-version: ${{ env.GoVersion }}
 
     - name: Download dependency
-      run: make dep
+      run: go mod download
 
     - name: Build
       run: |
-        make all
+        # spread the work across 2 processes
+        build1=$!
+        go run _script/build.go aliyun
+        build2=$!
+        go run _script/build.go tencent
+
+        wait $build1
+        wait $build2
 
     - name: Create Release
       if: github.event_name != 'release'
