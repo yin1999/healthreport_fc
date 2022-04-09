@@ -18,28 +18,9 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Set GoVersion
-      run: |
-        echo "GoVersion=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oEm 1 '"version": "[0-9]{1}.[0-9]{1,}(.[0-9]{1,})?"' | cut -d':' -f2 | sed 's/ //g; s/"//g')" >> ${GITHUB_ENV}
-
     - name: Check out code
       uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ env.GoVersion }}
-
-    - name: Download dependency
-      run: go mod download
-
     - name: Build
       run: |
-        # spread the work across 2 processes
-        build1=$!
-        go build -tags aliyun
-        build2=$!
-        go build -tags tencent
-
-        wait $build1
-        wait $build2
+        docker build .
