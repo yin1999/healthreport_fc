@@ -30,6 +30,5 @@ func aliyunInvoke(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add(fcStatus, "404")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "cannot report, err: %s", err.Error())
-		return
 	}
 }
