@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
-	"os"
+	"net/http"
 	"strings"
 	"time"
 
@@ -19,42 +18,9 @@ type handler interface {
 }
 
 func main() {
-	h, err := regist()
-	if err != nil {
-		os.Exit(1)
-	}
-	startServe(h)
-}
-
-func init() {
-	if os.Getenv("INSECURE") == "1" {
-		client.SetSslVerify(false)
-	}
-}
-
-func startServe(handler handler) {
-	for {
-		body, id, err := handler.Next()
-		if err != nil {
-			Error.Log("get trigger payload failed, err: %s\n", err.Error())
-			continue
-		}
-		t := &timerTrigger{}
-		err = json.NewDecoder(body).Decode(t)
-		body.Close() // close body
-		if err != nil {
-			msg := "parse request body failed, err: " + err.Error()
-			Error.Log(msg + "\n")
-			handler.ReportError(msg, id)
-			continue
-		}
-		err = punch(t.Payload)
-		if err != nil {
-			handler.ReportError(err.Error(), id)
-		} else {
-			handler.ReportSuccess(id)
-		}
-	}
+	http.HandleFunc("/invoke", aliyunInvoke)
+	http.HandleFunc("/event-invoke", tencentInvoke)
+	http.ListenAndServe("0.0.0.0:9000", nil)
 }
 
 func punch(payload string) error {
