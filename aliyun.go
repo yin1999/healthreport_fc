@@ -1,70 +1,34 @@
-//go:build aliyun || !tencent
-
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"strings"
 )
 
-type timerTrigger struct {
+type aliyunTrigger struct {
 	TriggerTime string `json:"triggerTime"`
 	TriggerName string `json:"triggerName"`
 	Payload     string `json:"payload"`
 }
 
-const (
-	fcStatus    = "X-Fc-Status"
-	fcRequestId = "X-Fc-Request-Id"
-	apiVersion  = "2020-11-11"
-	contentType = "text/plain"
-)
+const fcStatus = "X-Fc-Status"
 
-func regist() (handler, error) {
-	address := os.Getenv("FC_RUNTIME_API")
-	endpoint := fmt.Sprintf("http://%s/%s/runtime/invocation/", address, apiVersion)
-	return &aliyun{
-		endpoint: endpoint,
-		client:   http.Client{},
-	}, nil
-}
-
-type aliyun struct {
-	endpoint string
-	ua       string
-	client   http.Client
-}
-
-func (a aliyun) Next() (body io.ReadCloser, reqID string, err error) {
-	var resp *http.Response
-	resp, err = http.Get(a.endpoint + "next")
-	if err == nil {
-		body = resp.Body
-		reqID = resp.Header.Get(fcRequestId)
+func aliyunInvoke(w http.ResponseWriter, req *http.Request) {
+	t := aliyunTrigger{}
+	err := json.NewDecoder(req.Body).Decode(&t)
+	if err != nil {
+		msg := "parse request body failed, err: " + err.Error()
+		Error.Log(msg + "\n")
+		w.Header().Add(fcStatus, "404")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(msg))
+		return
 	}
-	return
-}
-
-func (a aliyun) ReportSuccess(id string) {
-	res, err := http.DefaultClient.Post(a.endpoint+id+"/response", contentType, http.NoBody)
-	if err == nil {
-		res.Body.Close()
-	} else {
-		Error.Log(err.Error() + "\n")
-	}
-}
-
-func (a aliyun) ReportError(msg string, id string) {
-	res, err := http.Post(a.endpoint+id+"/error",
-		contentType,
-		strings.NewReader(msg),
-	)
-	if err == nil {
-		res.Body.Close()
-	} else {
-		Error.Log(err.Error() + "\n")
+	err = punch(t.Payload)
+	if err != nil {
+		w.Header().Add(fcStatus, "404")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "cannot report, err: %s", err.Error())
 	}
 }
