@@ -9,6 +9,7 @@ import (
 	"time"
 
 	client "github.com/yin1999/healthreport/httpclient"
+	"github.com/yin1999/healthreport/utils/captcha"
 )
 
 type handler interface {
@@ -18,6 +19,8 @@ type handler interface {
 }
 
 func main() {
+	captcha.Init()
+	defer captcha.Close()
 	http.HandleFunc("/invoke", aliyunInvoke)
 	http.HandleFunc("/event-invoke", tencentInvoke)
 	http.ListenAndServe("0.0.0.0:9000", nil)
