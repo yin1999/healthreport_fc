@@ -18,7 +18,6 @@ func tencentInvoke(w http.ResponseWriter, req *http.Request) {
 	}
 	err = punch(t.Payload)
 	if err != nil {
-		w.Header().Add(fcStatus, "404")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "cannot report, err: %s", err.Error())
 	}
