@@ -31,7 +31,9 @@ func punch(payload string) error {
 	if len(account) < 2 {
 		return errors.New("invalid payload format")
 	}
-	err := client.Punch(context.Background(), &client.Account{Username: account[0], Password: account[1]}, 30*time.Second)
+	ctx, cc := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cc()
+	err := client.Punch(ctx, &client.Account{Username: account[0], Password: account[1]})
 	if err != nil {
 		Error.Log("account: %s punch failed, err: %s\n", account[0], err.Error())
 	} else {
