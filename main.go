@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	client "github.com/yin1999/healthreport/httpclient"
-	"github.com/yin1999/healthreport/utils/captcha"
+	client "github.com/yin1999/healthreport/v2/httpclient"
+	"github.com/yin1999/healthreport/v2/utils/captcha"
 )
 
 type handler interface {
