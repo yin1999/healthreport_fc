@@ -36,7 +36,8 @@ jobs:
       run: |
         # spread the work across 2 processes
         build1=$!
-        go build -tags aliyun notify
+        go build -tags aliyun
+        go build -tags notify
         build2=$!
         go build -tags tencent
 
