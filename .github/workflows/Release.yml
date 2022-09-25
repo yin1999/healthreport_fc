@@ -29,7 +29,7 @@ jobs:
       run: |
         # spread the work across 2 processes
         build1=$!
-        go run _script/build.go aliyun
+        go run _script/build.go aliyun notify
         build2=$!
         go run _script/build.go tencent
 

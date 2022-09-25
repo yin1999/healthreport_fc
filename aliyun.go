@@ -1,4 +1,4 @@
-//go:build aliyun || !tencent
+//go:build aliyun || !tencent || notify
 
 package main
 

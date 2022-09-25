@@ -1,6 +1,5 @@
 # binary file
-tencent-serverless.zip
-aliyun-serverless.zip
+*-serverless.zip
 
 # config file
 /.vscode

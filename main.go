@@ -1,22 +1,18 @@
+//go:build !notify
+
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
+	"fmt"
 	"os"
 	"strings"
 	"time"
 
 	client "github.com/yin1999/healthreport/httpclient"
 )
-
-type handler interface {
-	Next() (body io.ReadCloser, reqID string, err error)
-	ReportError(msg string, id string)
-	ReportSuccess(id string)
-}
 
 func main() {
 	h, err := regist()
@@ -64,7 +60,8 @@ func punch(payload string) error {
 	}
 	err := client.Punch(context.Background(), &client.Account{Username: account[0], Password: account[1]}, 30*time.Second)
 	if err != nil {
-		Error.Log("account: %s punch failed, err: %s\n", account[0], err.Error())
+		err = fmt.Errorf("account: %s punch failed, err: %s\n", account[0], err.Error())
+		Error.Log(err.Error())
 	} else {
 		Info.Log("account: %s punch success\n", account[0])
 	}

@@ -11,7 +11,7 @@ import (
 func main() {
 	var targets []string
 	if len(os.Args) == 1 {
-		targets = []string{"aliyun", "tencent"}
+		targets = []string{"aliyun", "tencent", "notify"}
 	} else {
 		targets = os.Args[1:]
 	}
@@ -20,7 +20,7 @@ func main() {
 	for _, target := range targets {
 		var out string
 		switch target {
-		case "aliyun":
+		case "aliyun", "notify":
 			out = "main"
 		case "tencent":
 			out = "bootstrap"
